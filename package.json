@@ -1,0 +1,12 @@
+{
+  "name": "typhoon-survival-game",
+  "private": true,
+  "scripts": {
+    "prepare:dist": "bash scripts/prepare-dist.sh",
+    "deploy": "npm run prepare:dist && wrangler deploy",
+    "preview": "npm run prepare:dist && wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.127.1"
+  }
+}
