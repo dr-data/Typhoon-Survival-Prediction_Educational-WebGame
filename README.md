@@ -1,5 +1,16 @@
 # Typhoon Survival Prediction - Educational Web Game
 
+## Related: Once in N Years (return period)
+
+This repository now also includes **Once in N Years**, a Cloudflare-hosted educational game that teaches the statistical meaning of “once in N years” (return period) for non-science university students, based on the [Hong Kong Observatory article](https://www.hko.gov.hk/en/education/climate/climate-change/00672-Return-Period-Once-in-N-Years.html).
+
+- Play locally: `cd once-in-n-years && npm install && npm test && npm run dev`
+- Product plan: [`once-in-n-years/docs/PRODUCT.md`](./once-in-n-years/docs/PRODUCT.md)
+
+The original typhoon-survival prototype below is unchanged.
+
+---
+
 ![Game Demo](./presentation/project1.gif)
 
 **🎮 Play the Official Game:** [https://easy2do.ncdr.nat.gov.tw/tyready/](https://easy2do.ncdr.nat.gov.tw/tyready/)  

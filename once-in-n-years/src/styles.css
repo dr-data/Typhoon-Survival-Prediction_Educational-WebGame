@@ -1,0 +1,348 @@
+:root {
+  color-scheme: dark;
+  --bg: #071422;
+  --bg-2: #0b1f33;
+  --card: #123049;
+  --card-2: #173a55;
+  --ink: #f4f8fb;
+  --muted: #b7c7d6;
+  --cyan: #3ec8e0;
+  --cyan-2: #9ae8f2;
+  --amber: #f0b429;
+  --coral: #e07a5f;
+  --teal: #3dba9b;
+  --line: #2a4a63;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  --font: "Source Sans 3", "Segoe UI", sans-serif;
+  --display: "Fraunces", Georgia, serif;
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: radial-gradient(1200px 600px at 10% -10%, #1a4a6b 0%, transparent 55%),
+    radial-gradient(900px 500px at 110% 10%, #3a2a12 0%, transparent 50%),
+    var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+button, input, select {
+  font: inherit;
+  color: inherit;
+}
+
+a { color: var(--cyan-2); }
+a:hover { color: var(--amber); }
+
+:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--amber);
+  color: #111;
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+.skip:focus { left: 0.5rem; top: 0.5rem; }
+
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 4rem;
+  position: relative;
+}
+
+.rain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    175deg,
+    transparent 0 18px,
+    rgba(180, 220, 255, 0.07) 18px 19px
+  );
+  animation: fall 8s linear infinite;
+  opacity: 0.45;
+  z-index: 0;
+}
+
+@keyframes fall {
+  from { background-position: 0 0; }
+  to { background-position: 0 220px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rain { animation: none; }
+}
+
+.top, main, .foot { position: relative; z-index: 1; }
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.brand-mark {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--amber);
+  color: #1a1204;
+  font-weight: 700;
+}
+
+.nav { display: flex; gap: 0.4rem; }
+.nav button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+.nav button.is-active,
+.nav button:hover {
+  border-color: var(--cyan);
+  color: var(--cyan-2);
+}
+
+.hero h1, .panel h1, .question h1 {
+  font-family: var(--display);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0.3rem 0 1rem;
+}
+
+.hero h1 { font-size: clamp(2rem, 6vw, 3.4rem); }
+.hero h1 em { color: var(--amber); font-style: italic; }
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  color: var(--cyan-2);
+  margin: 0;
+}
+
+.lede { font-size: 1.15rem; max-width: 42rem; color: var(--muted); }
+
+.hero-actions, .inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 1.4rem 0;
+}
+
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.2rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--amber); color: #1a1204; font-weight: 700; }
+.btn-secondary { background: var(--card-2); border: 1px solid var(--cyan); }
+.btn-ghost { background: transparent; border: 1px solid var(--line); }
+
+.facts {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.facts li {
+  background: color-mix(in srgb, var(--card) 88%, black);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow);
+}
+.facts strong {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.4rem;
+  color: var(--cyan-2);
+}
+
+.panel, .question, .feedback {
+  background: color-mix(in srgb, var(--card) 92%, black);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 1.4rem 1.4rem 1.6rem;
+  box-shadow: var(--shadow);
+}
+
+.stack { display: grid; gap: 1rem; }
+.field { display: grid; gap: 0.35rem; }
+.field span, .segmented legend { color: var(--muted); font-size: 0.95rem; }
+.field input, .field select, .calc-form input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  min-height: 44px;
+}
+
+.segmented {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  flex-wrap: wrap;
+}
+.segmented label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.segmented input:checked + * ,
+.segmented label:has(input:checked) {
+  background: var(--bg);
+  outline: 1px solid var(--cyan);
+}
+
+.check { display: flex; gap: 0.6rem; align-items: flex-start; }
+
+.brief { padding-left: 1.2rem; }
+.brief li { margin: 0.7rem 0; }
+
+.formula {
+  font-family: ui-monospace, monospace;
+  background: var(--bg);
+  border-left: 4px solid var(--cyan);
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+}
+
+.hud {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  color: var(--muted);
+}
+
+.choices, .graphs { display: grid; gap: 0.7rem; }
+.choice, .graph-option {
+  text-align: left;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.45rem;
+  color: inherit;
+}
+.choice { grid-template-columns: auto 1fr; align-items: start; }
+.choice kbd {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.85rem;
+}
+.graph-option { position: relative; }
+.graph-option input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.graph-option.is-selected { border-color: var(--cyan); box-shadow: 0 0 0 2px var(--cyan); }
+.graph-option-title { font-weight: 700; }
+.graph-option-caption { color: var(--muted); font-size: 0.92rem; }
+
+.chart { width: 100%; height: auto; background: #081525; border-radius: 10px; }
+.chart-axis, .chart-threshold { stroke: var(--amber); stroke-width: 2; }
+.chart-event { fill: var(--cyan); }
+.chart-tick { fill: #4d6b82; }
+.chart-label, .chart-onbar { fill: var(--ink); font-size: 11px; font-family: var(--font); }
+.chart-bar-a { fill: var(--cyan); }
+.chart-bar-b { fill: var(--amber); }
+.chart-rain { fill: #3d6d8c; }
+.chart-rain-over { fill: var(--coral); }
+
+.feedback { margin-top: 1rem; }
+.feedback-correct { border-color: var(--teal); }
+.feedback-partial { border-color: var(--amber); }
+.feedback-incorrect { border-color: var(--coral); }
+.miscon { color: var(--amber); }
+.live:focus { outline: none; }
+
+.sim { display: grid; gap: 0.9rem; margin: 1rem 0; }
+.sim-chart { min-height: 88px; }
+.sim-readout, .sim-note { margin: 0; }
+.sim-note { color: var(--muted); }
+
+.concepts { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+.concepts li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.7rem;
+  align-items: center;
+}
+meter {
+  width: 140px;
+  height: 12px;
+  accent-color: var(--teal);
+}
+
+.scoreline { font-size: 1.2rem; }
+blockquote {
+  border-left: 4px solid var(--amber);
+  margin: 1rem 0;
+  padding-left: 1rem;
+  color: var(--muted);
+}
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; }
+
+.muted, .fine, .foot { color: var(--muted); }
+.fine, .foot { font-size: 0.88rem; }
+.foot { margin-top: 2.5rem; }
+.error { color: var(--coral); }
+
+@media (max-width: 640px) {
+  .top { align-items: flex-start; }
+  .concepts li { grid-template-columns: 1fr; }
+  meter { width: 100%; }
+}
