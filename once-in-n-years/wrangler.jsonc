@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "once-in-n-years",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "once-in-n-years",
+      "database_id": "27b71f48-bd9b-46cf-9b15-1f7c2360dd03",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT",
+      "id": "a16808c2623442e08ebd225a9abc89d3"
+    }
+  ],
+  "vars": {
+    "TURNSTILE_SITE_KEY": ""
+  }
+  // Optional after `wrangler login`:
+  // "ai": { "binding": "AI" }
+  // Local `npm run dev` stays fully offline without this binding.
+}

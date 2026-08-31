@@ -1,0 +1,35 @@
+{
+  "name": "once-in-n-years",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Educational game about return periods — 'once in N years' — for non-science university students.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -b --pretty false",
+    "preview": "npm run build && vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy",
+    "db:migrate:local": "CI=1 wrangler d1 migrations apply once-in-n-years --local",
+    "db:migrate:remote": "wrangler d1 migrations apply once-in-n-years --remote"
+  },
+  "dependencies": {
+    "hono": "^4.9.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.13.0",
+    "@cloudflare/workers-types": "latest",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.34.0"
+  }
+}
