@@ -2,7 +2,7 @@
 
 An educational game for non-science university students on the **return period** (“once in N years”), based on the [Hong Kong Observatory educational article](https://www.hko.gov.hk/en/education/climate/climate-change/00672-Return-Period-Once-in-N-Years.html).
 
-The working MVP lives in `once-in-n-years/`. This document is the product spec, architecture, and roadmap that the code implements.
+This document is the product spec, architecture, and roadmap that the code implements.
 
 ---
 
@@ -241,32 +241,33 @@ See `migrations/0001_init.sql`:
 ## 12. Folder structure
 
 ```
-once-in-n-years/
-  docs/PRODUCT.md          ← this file
-  README.md                ← run / deploy
-  wrangler.jsonc
-  vite.config.ts
-  vitest.config.ts
-  migrations/0001_init.sql
-  shared/
-    math.ts                ← formulas, RNG, simulation
-    scoring.ts
-    nicknames.ts
-    questions/
-      types.ts
-      generate.ts          ← the only source of answer keys
-      grade.ts
-  worker/
-    index.ts               ← Hono API
-    rateLimit.ts
-    turnstile.ts
-    hints.ts
-  src/                     ← React UI
-  tests/                   ← Vitest
-  public/favicon.svg
+docs/PRODUCT.md          ← this file
+README.md                ← run / deploy
+wrangler.jsonc
+vite.config.ts
+vitest.config.ts
+migrations/0001_init.sql
+shared/
+  math.ts                ← formulas, RNG, simulation
+  scoring.ts
+  nicknames.ts
+  questions/
+    types.ts
+    kit.ts / mcq.ts / visuals.ts
+    generate.ts          ← orchestrates factories; only source of answer keys
+    grade.ts
+worker/
+  index.ts               ← Hono API
+  rateLimit.ts
+  turnstile.ts
+  hints.ts
+src/
+  App.tsx                ← shell
+  views/                 ← home, setup, briefing, play, lab, summary, board
+  components/            ← charts, simulator, harbour scene
+tests/                   ← Vitest
+public/favicon.svg
 ```
-
-The original typhoon-survival prototype remains at the repository root and is unchanged.
 
 ---
 
@@ -284,7 +285,6 @@ Already implemented:
 Local:
 
 ```bash
-cd once-in-n-years
 npm install
 npm test
 npm run db:migrate:local

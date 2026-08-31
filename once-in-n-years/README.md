@@ -8,17 +8,16 @@ A return period \(T\) is a **long-term average**, not a promise that the event h
 
 ## Play locally
 
-Requires Node 22+.
+Requires Node 22+. Run these from the repository root.
 
 ```bash
-cd once-in-n-years
 npm install
 npm test
 npm run db:migrate:local
 npm run dev
 ```
 
-`npm run dev` does **not** require a Cloudflare account. Workers AI is off by default so Vite will not open a login window. To enable paraphrased hints later, add `"ai": { "binding": "AI" }` to `wrangler.jsonc` after `npx wrangler login`.
+`npm run dev` does **not** require a Cloudflare account. Workers AI is not bound, so Vite will not open a login window. To enable paraphrased hints later, add `"ai": { "binding": "AI" }` to `wrangler.jsonc` after `npx wrangler login`.
 
 Open the URL Vite prints (usually `http://localhost:5173`).
 
@@ -37,10 +36,7 @@ npm run db:migrate:remote
 npm run deploy
 ```
 
-```bash
-npm run db:migrate:remote
-npm run deploy
-```
+GitHub Actions can deploy on every push to `main` once you add repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (Workers edit permission). Then use **Actions → Deploy to Cloudflare Workers → Run workflow**.
 
 Optional secrets:
 
@@ -50,16 +46,16 @@ npx wrangler secret put TURNSTILE_SECRET
 
 Set `TURNSTILE_SITE_KEY` in `wrangler.jsonc` `vars` (public). Leave both empty to skip bot checks in class demos.
 
-Workers AI is bound as `AI`. Hints still fall back to the validated template if the model is missing or invents numbers.
+Workers AI is not bound. Hints always use the validated template unless you later add an `AI` binding in `wrangler.jsonc`. Even then, paraphrases are discarded if they omit required formula tokens or numbers.
 
 ## What is generated where
 
 | Thing | Source |
 |---|---|
 | Formulas and simulations | `shared/math.ts` |
-| Question wording and **answer keys** | `shared/questions/generate.ts` only |
+| Question wording and **answer keys** | `shared/questions/` factories, assembled in `generate.ts` |
 | Score | `shared/scoring.ts`, re-run on the Worker |
-| AI | May paraphrase an existing explanation; never writes keys |
+| AI | Optional paraphrase of an existing explanation; never writes keys |
 
 ## Tests
 
