@@ -38,6 +38,25 @@ function hazard(rng: () => number): Hazard {
   return pick(rng, HAZARDS);
 }
 
+function shuffle<T>(rng: () => number, items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [copy[i], copy[j]] = [copy[j] as T, copy[i] as T];
+  }
+  return copy;
+}
+
+function chipsFrom(rng: () => number, items: { label: string; value: string }[]) {
+  const seen = new Set<string>();
+  const unique = items.filter((item) => {
+    if (seen.has(item.value)) return false;
+    seen.add(item.value);
+    return true;
+  });
+  return shuffle(rng, unique).slice(0, 4);
+}
+
 function timelineGraph(
   years: number,
   eventYears: number[],
@@ -57,13 +76,20 @@ function calcTFromP(rng: () => number): { question: PublicQuestion; key: AnswerK
       id: qid,
       type: "calc",
       concept: "t-from-p",
-      title: "From chance to “once in N years”",
-      prompt: `Statisticians estimate that ${event} has a ${asPercent(p, 0)}% chance of happening in any given year. What is the return period, in years?`,
+      title: "Name that storm",
+      prompt: `The harbour desk says ${event} has a ${asPercent(p, 0)}% chance this year. What nickname would they give it — a how-many-year event?`,
       context:
-        "Return period T is the long-term average wait between events. It is the reciprocal of the annual probability.",
-      formulaHint: "T = 1 / p",
+        "Tap the average wait. A 5% chance each year is a 20-year event. That is a nickname for the average, not a booking.",
+      formulaHint: "T = 1 / p   (turn the percent into a decimal first, e.g. 5% = 0.05)",
       unit: "years",
       placeholder: "years",
+      chips: chipsFrom(rng, [
+        { label: `${T}-year event`, value: String(T) },
+        { label: `${asPercent(p, 0)}-year event`, value: String(asPercent(p, 0)) },
+        { label: "100-year event", value: "100" },
+        { label: "1-year event", value: "1" },
+        { label: `${T * 2}-year event`, value: String(T * 2) },
+      ]),
     },
     key: {
       id: qid,
@@ -87,12 +113,19 @@ function calcPFromT(rng: () => number): { question: PublicQuestion; key: AnswerK
       id: qid,
       type: "calc",
       concept: "p-from-t",
-      title: "What does “once in N years” mean this year?",
-      prompt: `${event} is described as a ${T}-year event. What is the annual probability? You may answer as a percent (for example ${asPercent(p, 0)}) or as a decimal (for example ${p}).`,
-      context: "If T is the return period, the chance in any one year is p = 1 / T, assuming a stable climate and independent years.",
-      formulaHint: "p = 1 / T",
+      title: "This year’s chance",
+      prompt: `Someone calls ${event} a “${T}-year event”. What is the chance it happens this year?`,
+      context: "The number in the nickname is not a probability. Flip it: chance this year = 1 ÷ N.",
+      formulaHint: "p = 1 / T   (a 20-year event is 5% this year)",
       unit: "probability",
       placeholder: "% or decimal",
+      chips: chipsFrom(rng, [
+        { label: `${asPercent(p, 0)}% this year`, value: String(p) },
+        { label: "100% this year", value: "1" },
+        { label: `${T}% this year`, value: String(T / 100) },
+        { label: "0% this year", value: "0" },
+        { label: "50% this year", value: "0.5" },
+      ]),
     },
     key: {
       id: qid,
@@ -124,13 +157,20 @@ function calcAtLeastOnce(rng: () => number): { question: PublicQuestion; key: An
       id: qid,
       type: "calc",
       concept: "at-least-once",
-      title: "Over many years, not just one",
-      prompt: `If ${event} is a ${T}-year event, what is the probability it happens at least once in ${n} years? Give your answer as a percent, to 1 decimal place.`,
+      title: "A whole career, not one year",
+      prompt: `If ${event} is a ${T}-year event, what is the chance it shows up at least once in ${n} years?`,
       context:
-        "Years are treated as independent. The chance of surviving every year is (1 − 1/T)^n, so the chance of at least one event is 1 minus that.",
-      formulaHint: "P(at least one in n years) = 1 − (1 − 1/T)^n",
+        "Do not add the years up. Each year is a fresh roll. The surprise: a 100-year event is not guaranteed in 100 years.",
+      formulaHint: "P(at least once) = 1 − (1 − 1/T)^n",
       unit: "percent",
       placeholder: "%",
+      chips: chipsFrom(rng, [
+        { label: `${percent}%`, value: String(percent) },
+        { label: "100%", value: "100" },
+        { label: `${asPercent(1 / T, 0)}%`, value: String(asPercent(1 / T, 0)) },
+        { label: "50%", value: "50" },
+        { label: "0%", value: "0" },
+      ]),
     },
     key: {
       id: qid,
@@ -153,7 +193,7 @@ function mcqNotASchedule(rng: () => number): { question: PublicQuestion; key: An
       id: qid,
       type: "mcq",
       concept: "not-a-schedule",
-      title: "Does it happen exactly once?",
+      title: "The calendar myth",
       prompt: `Does a ${T}-year event happen exactly once every ${T} years?`,
       context:
         "The Hong Kong Observatory stresses that a return period is a long-term statistical average, not a guarantee.",
@@ -183,7 +223,7 @@ function mcqIndependence(rng: () => number): { question: PublicQuestion; key: An
       id: qid,
       type: "mcq",
       concept: "independence",
-      title: "After a rare event, is next year safer?",
+      title: "Last year used it up?",
       prompt: `A ${T}-year rainstorm happened last year. What is the best statement about this year?`,
       context: "Under the standard teaching model, each year is an independent draw with the same probability.",
       choices: [
@@ -211,7 +251,7 @@ function mcqTwiceInTen(rng: () => number): { question: PublicQuestion; key: Answ
       id: qid,
       type: "mcq",
       concept: "clustering",
-      title: "Can a 100-year event happen twice in 10 years?",
+      title: "Two in ten years?!",
       prompt: "Can a 100-year event happen twice within 10 years?",
       context: "Extreme events are random. Unlikely is not impossible.",
       choices: [
@@ -240,7 +280,7 @@ function mcqRarity(rng: () => number): { question: PublicQuestion; key: AnswerKe
       id: qid,
       type: "mcq",
       concept: "rarity",
-      title: "Which event is rarer?",
+      title: "Which is the rarer beast?",
       prompt: "Which event is rarer: a 10-year event or a 100-year event?",
       context: "Longer return period means a smaller annual probability, so the event is more extreme and less frequent on average.",
       choices: [
@@ -396,7 +436,7 @@ function graphTimeline(rng: () => number): { question: PublicQuestion; key: Answ
       id: qid,
       type: "graph",
       concept: "clustering",
-      title: "Which history looks like a return period?",
+      title: "Read the skyline",
       prompt: `Which timeline best represents a ${T}-year event over ${years} years?`,
       context: `You should expect about ${expected} events on average, but not equally spaced. A completely empty record is possible but not the best picture of the long-term average. A tick every ${T} years is the common misconception.`,
       graphs,
@@ -469,7 +509,7 @@ function graphBars(rng: () => number): { question: PublicQuestion; key: AnswerKe
       id: qid,
       type: "graph",
       concept: "rarity",
-      title: "Read the probability bars",
+      title: "Taller bar, more likely",
       prompt: "Which chart correctly compares the annual probability of a 10-year event and a 100-year event?",
       context: "Annual probability is 1/T. Taller bar = more likely this year = shorter return period.",
       graphs,
@@ -565,7 +605,7 @@ function simQuestion(rng: () => number): { question: PublicQuestion; key: Answer
       id: qid,
       type: "sim",
       concept: "expected-count",
-      title: "Run the years",
+      title: "Shake the dice",
       prompt: `Simulate a ${T}-year event. After you run it, choose the statement that matches what return periods mean.`,
       context: `Expected count over ${n} years is ${expectedCount(T, n)}. Your run will probably not hit that number exactly.`,
       sim: {

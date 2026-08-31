@@ -23,6 +23,15 @@ describe("quiz generation", () => {
     expect(quiz.questions.some((q) => q.concept === "climate-change")).toBe(true);
   });
 
+  it("gives calculation questions tappable answer chips", () => {
+    const quiz = buildQuiz(11, "practice");
+    const calcs = quiz.questions.filter((q) => q.type === "calc");
+    expect(calcs.length).toBeGreaterThan(0);
+    for (const question of calcs) {
+      expect(question.chips?.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
   it("never lets an answer key drift from the public question id", () => {
     const quiz = buildQuiz(7, "challenge");
     for (const question of quiz.questions) {

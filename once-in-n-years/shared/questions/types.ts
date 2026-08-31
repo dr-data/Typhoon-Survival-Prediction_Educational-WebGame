@@ -59,6 +59,11 @@ export type Choice = {
   label: string;
 };
 
+export type AnswerChip = {
+  label: string;
+  value: string;
+};
+
 export type PublicQuestion = {
   id: string;
   type: QuestionType;
@@ -69,6 +74,7 @@ export type PublicQuestion = {
   formulaHint?: string;
   unit?: NumericUnit;
   placeholder?: string;
+  chips?: AnswerChip[];
   choices?: Choice[];
   graphs?: GraphOption[];
   sim?: {
@@ -77,6 +83,13 @@ export type PublicQuestion = {
     defaultYears: number;
     promptAfterRun: string;
   };
+};
+
+export const TYPE_LABELS: Record<QuestionType, string> = {
+  calc: "Quick call",
+  mcq: "True or not?",
+  graph: "Pick the picture",
+  sim: "Run the years",
 };
 
 export type AnswerKey = {

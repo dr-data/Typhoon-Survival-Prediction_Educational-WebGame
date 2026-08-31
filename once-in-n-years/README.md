@@ -22,22 +22,20 @@ npm run dev
 
 Open the URL Vite prints (usually `http://localhost:5173`).
 
-- **Practice** — 8 questions, formula hints, ×1 scoring
-- **Challenge** — 14 questions, multi-year probability, climate/data caveats, ×1.5
-- **Lab** — slider for \(T\), 10 / 50 / 100 year runs, new random histories
-- **Leaderboard** — nickname or anonymous ID, optional class code
+- **Morning watch (Practice)** — 8 tap-the-answer calls, optional formula, ~6 minutes
+- **Typhoon watch (Challenge)** — 14 calls, climate plot twists, 1.5× score
+- **Weather dice** — slider for \(T\), 10 / 50 / 100 year runs, reroll
+- **Honour board** — nickname or anonymous storm ID, optional class code
 
 ## Deploy on Cloudflare
 
-1. `npx wrangler login`
-2. Create D1 and KV, then replace the placeholder ids in `wrangler.jsonc`:
+D1 (`once-in-n-years`) and KV (`ONCE_IN_N_YEARS_RATE_LIMIT`) are already created for this account. IDs live in `wrangler.jsonc`.
 
 ```bash
-npx wrangler d1 create once-in-n-years
-npx wrangler kv namespace create RATE_LIMIT
+npx wrangler login
+npm run db:migrate:remote
+npm run deploy
 ```
-
-3. Apply migrations and deploy:
 
 ```bash
 npm run db:migrate:remote

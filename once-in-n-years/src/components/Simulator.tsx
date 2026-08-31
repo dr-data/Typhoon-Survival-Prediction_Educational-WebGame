@@ -47,7 +47,7 @@ export function Simulator({
           ))}
         </fieldset>
         <button type="button" className="btn btn-secondary" onClick={() => setSeed((s) => s + 1)}>
-          Run again with a new random history
+          Reroll this history
         </button>
       </div>
       <SimTimeline result={result} />

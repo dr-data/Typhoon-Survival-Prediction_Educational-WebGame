@@ -3,9 +3,10 @@ import { CLASSIC_100_IN_100, asPercent, roundTo } from "../shared/math";
 import { sanitiseNickname } from "../shared/nicknames";
 import { buildQuiz } from "../shared/questions/generate";
 import { gradeRun } from "../shared/questions/grade";
-import type { Quiz, StudentAnswer } from "../shared/questions/types";
+import { TYPE_LABELS, type Quiz, type StudentAnswer } from "../shared/questions/types";
 import type { Difficulty } from "../shared/scoring";
 import { Charts } from "./components/Charts";
+import { HarbourScene, Nimbus } from "./components/Scene";
 import { Simulator } from "./components/Simulator";
 import { fetchLeaderboard, submitRun, type LeaderboardEntry } from "./lib/api";
 
@@ -25,6 +26,17 @@ const DEFAULT_PLAYER: Player = {
   difficulty: "practice",
 };
 
+const WATCHES = [
+  "Watch 1 · The nickname",
+  "Watch 2 · This year’s chance",
+  "Watch 3 · The calendar myth",
+  "Watch 4 · Rarer beasts",
+  "Watch 5 · Read the sky",
+  "Watch 6 · Two in ten?!",
+  "Watch 7 · Picture the odds",
+  "Watch 8 · Shake the dice",
+];
+
 export default function App() {
   const [view, setView] = useState<View>("home");
   const [player, setPlayer] = useState<Player>(DEFAULT_PLAYER);
@@ -38,23 +50,27 @@ export default function App() {
     [answers, seed, player.difficulty],
   );
 
+  const nimbusMood =
+    view === "summary" ? "cheer" : view === "play" ? "think" : view === "lab" ? "idle" : "idle";
+
   return (
     <div className="app">
-      <Rain />
-      <a className="skip" href="#main">
-        Skip to content
-      </a>
+      <HarbourScene />
+      <a className="skip" href="#main">Skip to content</a>
       <header className="top">
         <button type="button" className="brand" onClick={() => setView("home")}>
           <span className="brand-mark" aria-hidden="true">N</span>
-          Once in N Years
+          <span>
+            Once in N Years
+            <small>Harbour Watch</small>
+          </span>
         </button>
         <nav className="nav" aria-label="Game">
           <button type="button" className={view === "lab" ? "is-active" : ""} onClick={() => setView("lab")}>
-            Lab
+            Weather lab
           </button>
           <button type="button" className={view === "board" ? "is-active" : ""} onClick={() => setView("board")}>
-            Leaderboard
+            Honour board
           </button>
         </nav>
       </header>
@@ -79,10 +95,7 @@ export default function App() {
           />
         )}
         {view === "briefing" && (
-          <Briefing
-            difficulty={player.difficulty}
-            onContinue={() => setView("play")}
-          />
+          <Briefing difficulty={player.difficulty} onContinue={() => setView("play")} />
         )}
         {view === "play" && (
           <Play
@@ -93,9 +106,7 @@ export default function App() {
             }}
           />
         )}
-        {view === "lab" && (
-          <Lab onPlay={() => setView("setup")} />
-        )}
+        {view === "lab" && <Lab onPlay={() => setView("setup")} />}
         {view === "summary" && report && (
           <Summary
             player={player}
@@ -104,7 +115,7 @@ export default function App() {
             answers={answers}
             submitState={submitState}
             onSubmit={async () => {
-              setSubmitState("Saving…");
+              setSubmitState("Pinning your score to the harbour board…");
               try {
                 const nick = sanitiseNickname(player.nickname, player.anonymous);
                 if (!nick.ok) {
@@ -120,7 +131,7 @@ export default function App() {
                   answers,
                 });
                 setPlayer((current) => ({ ...current, nickname: nick.nickname }));
-                setSubmitState(`Saved ${nick.nickname} · ${report.totalPoints} pts`);
+                setSubmitState(`Pinned ${nick.nickname} · ${report.totalPoints} pts`);
                 setView("board");
               } catch (error) {
                 setSubmitState(error instanceof Error ? error.message : "Could not save.");
@@ -138,14 +149,16 @@ export default function App() {
           <Board classCode={player.classCode} difficulty={player.difficulty} />
         )}
       </main>
+      <aside className="nimbus-dock">
+        <Nimbus mood={nimbusMood} />
+      </aside>
       <footer className="foot">
-        Based on the Hong Kong Observatory’s explanation of return periods.
-        A return period is a long-term average — not a guarantee.
+        A return period is a long-term average — never a promise.
         {" "}
         <a href="https://www.hko.gov.hk/en/education/climate/climate-change/00672-Return-Period-Once-in-N-Years.html">
-          Source
+          Hong Kong Observatory
         </a>
-        . No email or real name is collected.
+        . No email collected.
       </footer>
     </div>
   );
@@ -162,39 +175,41 @@ function Home({
 }) {
   return (
     <section className="hero">
-      <p className="eyebrow">Educational game · for non-science university courses</p>
+      <p className="eyebrow">Tonight’s harbour watch · for non-science students</p>
       <h1>
-        If a storm is “once in 100 years”,
-        <em> are you safe for 99 years?</em>
+        “Once in 100 years.”
+        <em> Does that mean you’re safe until 2126?</em>
       </h1>
       <p className="lede">
-        No. A <strong>return period</strong> is a long-term statistical average.
-        A 100-year event has about a 1% chance each year. It may happen twice in a decade,
-        or not at all in a century. Play to see why.
+        Nimbus the cloud thinks so. Nimbus is wrong. Clock in as a junior observer and
+        bust the calendar myth in about eight minutes — with pictures, dice, and tap-the-answer calls.
       </p>
       <div className="hero-actions">
         <button type="button" className="btn btn-primary" onClick={onPlay}>
-          Play the quiz
+          Clock in for a watch
         </button>
         <button type="button" className="btn btn-secondary" onClick={onLab}>
-          Open the simulation lab
+          Shake the weather dice
         </button>
         <button type="button" className="btn btn-ghost" onClick={onBoard}>
-          Leaderboard
+          Honour board
         </button>
       </div>
       <ul className="facts">
         <li>
-          <strong>T = 1 / p</strong>
-          <span>Return period is the reciprocal of annual probability.</span>
+          <span className="fact-icon" aria-hidden="true">1÷</span>
+          <strong>Flip the nickname</strong>
+          <span>A 20-year event is just 5% this year. Tap it. Don’t derive it from a textbook first.</span>
         </li>
         <li>
-          <strong>{roundTo(asPercent(CLASSIC_100_IN_100, 1), 1)}%</strong>
-          <span>Chance of at least one 100-year event in 100 years — not 100%.</span>
+          <span className="fact-icon" aria-hidden="true">{roundTo(asPercent(CLASSIC_100_IN_100, 1), 1)}%</span>
+          <strong>Not a booking</strong>
+          <span>A 100-year storm is only ~63% likely to show up even once in 100 years.</span>
         </li>
         <li>
-          <strong>Random clustering</strong>
-          <span>Events can bunch together, then vanish for a long stretch.</span>
+          <span className="fact-icon" aria-hidden="true">•• •</span>
+          <strong>Storms cluster</strong>
+          <span>Two close together, then a long quiet spell. That’s random, not a broken model.</span>
         </li>
       </ul>
     </section>
@@ -224,38 +239,41 @@ function Setup({
   }
 
   return (
-    <section className="panel">
-      <h1>How do you want to play?</h1>
-      <p>
-        Practice is untimed-friendly with formula hints. Challenge adds multi-year probability,
-        climate caveats, and a 1.5× score multiplier.
-      </p>
+    <section className="panel glow">
+      <h1>Pick your watch</h1>
+      <p>Same idea either way. Typhoon watch just asks the spicier questions and pays 1.5× points.</p>
       <form className="stack" onSubmit={handleSubmit}>
-        <fieldset className="segmented">
-          <legend>Difficulty</legend>
-          {(["practice", "challenge"] as const).map((value) => (
-            <label key={value}>
-              <input
-                type="radio"
-                name="difficulty"
-                checked={player.difficulty === value}
-                onChange={() => onChange({ ...player, difficulty: value })}
-              />
-              {value === "practice" ? "Practice" : "Challenge"}
-            </label>
-          ))}
-        </fieldset>
+        <div className="watch-pick">
+          <button
+            type="button"
+            className={player.difficulty === "practice" ? "watch-card is-on" : "watch-card"}
+            onClick={() => onChange({ ...player, difficulty: "practice" })}
+          >
+            <span className="watch-kicker">Morning watch</span>
+            <strong>Practice</strong>
+            <span>8 quick calls · tap answers · hints if you want them · about 6 minutes</span>
+          </button>
+          <button
+            type="button"
+            className={player.difficulty === "challenge" ? "watch-card is-on" : "watch-card"}
+            onClick={() => onChange({ ...player, difficulty: "challenge" })}
+          >
+            <span className="watch-kicker">Typhoon watch</span>
+            <strong>Challenge</strong>
+            <span>14 calls · climate plot twists · 1.5× score · bragging rights</span>
+          </button>
+        </div>
         <label className="check">
           <input
             type="checkbox"
             checked={player.anonymous}
             onChange={(event) => onChange({ ...player, anonymous: event.target.checked })}
           />
-          Use an anonymous ID (recommended — we never ask for your real name)
+          Stay anonymous (we mint a storm ID — never your real name)
         </label>
         {!player.anonymous && (
           <label className="field">
-            <span>Nickname</span>
+            <span>Observer nickname</span>
             <input
               value={player.nickname}
               onChange={(event) => onChange({ ...player, nickname: event.target.value })}
@@ -266,7 +284,7 @@ function Setup({
           </label>
         )}
         <label className="field">
-          <span>Class or tutorial group code (optional)</span>
+          <span>Class or tutorial code (optional)</span>
           <input
             value={player.classCode}
             onChange={(event) => onChange({ ...player, classCode: event.target.value })}
@@ -276,38 +294,68 @@ function Setup({
           />
         </label>
         {error && <p className="error" role="alert">{error}</p>}
-        <button type="submit" className="btn btn-primary">Continue to the briefing</button>
+        <button type="submit" className="btn btn-primary">Meet Nimbus →</button>
       </form>
     </section>
   );
 }
 
+const BRIEF_CARDS = [
+  {
+    kicker: "The nickname",
+    title: "“Once in N years” is a nickname, not a diary.",
+    body: "A 20-year event is just a 5% chance this year. Flip the number: T = 1 / p. Nobody promised you a storm in year 20.",
+  },
+  {
+    kicker: "The dice",
+    title: "Each year is a fresh roll.",
+    body: "Last year’s flood does not “use up” this year’s chance. Unlikely things can still happen twice in a row.",
+  },
+  {
+    kicker: "The surprise",
+    title: "100 years is not a 100% chance.",
+    body: "A 100-year event has only about a 63% chance of showing up at least once in 100 years. Quiet centuries happen.",
+  },
+  {
+    kicker: "The small print",
+    title: "The number can move.",
+    body: "Short records, fancy curves, different cities, and a changing climate can all revise N. Treat it as useful, not carved in stone.",
+  },
+];
+
 function Briefing({ difficulty, onContinue }: { difficulty: Difficulty; onContinue: () => void }) {
+  const [page, setPage] = useState(0);
+  const card = BRIEF_CARDS[page];
+  if (!card) return null;
+  const last = page === BRIEF_CARDS.length - 1;
   return (
-    <section className="panel">
-      <h1>The one idea to keep</h1>
-      <ol className="brief">
-        <li>
-          <strong>Name.</strong> “Once in N years” is a <em>return period</em> T. It is an average wait, not a calendar appointment.
-        </li>
-        <li>
-          <strong>Formula.</strong> If p is the chance in any one year, then T = 1 / p. A 20-year event is 5% per year.
-        </li>
-        <li>
-          <strong>Many years.</strong> The chance of at least one event in n years is 1 − (1 − 1/T)<sup>n</sup>. For T = 100 and n = 100 that is about 63%, not 100%.
-        </li>
-        <li>
-          <strong>Caveats.</strong> Short records, statistical methods, geography, and climate change can all move the estimated T.
-        </li>
-      </ol>
-      <p className="muted">
-        {difficulty === "challenge"
-          ? "Challenge mode expects the multi-year formula and the Observatory caveats."
-          : "Practice mode shows the formula on calculation questions."}
-      </p>
-      <button type="button" className="btn btn-primary" onClick={onContinue}>
-        Start the questions
-      </button>
+    <section className="panel story">
+      <p className="eyebrow">{card.kicker} · {page + 1}/{BRIEF_CARDS.length}</p>
+      <h1>{card.title}</h1>
+      <p className="lede">{card.body}</p>
+      <div className="story-dots" aria-hidden="true">
+        {BRIEF_CARDS.map((item, i) => (
+          <span key={item.kicker} className={i === page ? "is-on" : ""} />
+        ))}
+      </div>
+      <div className="hero-actions">
+        {page > 0 && (
+          <button type="button" className="btn btn-ghost" onClick={() => setPage((n) => n - 1)}>
+            Back
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => (last ? onContinue() : setPage((n) => n + 1))}
+        >
+          {last
+            ? difficulty === "challenge"
+              ? "Start typhoon watch"
+              : "Start morning watch"
+            : "Next beat"}
+        </button>
+      </div>
     </section>
   );
 }
@@ -316,23 +364,43 @@ function Play({ quiz, onFinish }: { quiz: Quiz; onFinish: (answers: StudentAnswe
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<StudentAnswer[]>([]);
   const [draft, setDraft] = useState("");
+  const [showHint, setShowHint] = useState(false);
+  const [showType, setShowType] = useState(false);
+  const [pop, setPop] = useState("");
   const [startedAt, setStartedAt] = useState(() => Date.now());
+  const live = useRef<HTMLDivElement>(null);
   const question = quiz.questions[index];
   const key = quiz.keys[index];
   const feedback = answers[index];
-  const live = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setDraft("");
+    setShowHint(false);
+    setShowType(false);
     setStartedAt(Date.now());
   }, [index]);
 
-  if (!question || !key) return null;
-
-  const graded = feedback
+  const graded = question && key && feedback
     ? gradeRun(quiz.seed, quiz.difficulty, answers.slice(0, index + 1)).items[index]
     : null;
+
+  useEffect(() => {
+    if (!graded) return;
+    if (graded.kind === "correct") {
+      setPop(graded.grade.streak >= 3 ? `Combo ×${graded.grade.streak}` : "Nice catch");
+    } else if (graded.kind === "partial") {
+      setPop("Close…");
+    } else {
+      setPop("Plot twist");
+    }
+    const timer = window.setTimeout(() => setPop(""), 900);
+    return () => window.clearTimeout(timer);
+  }, [graded?.kind, graded?.grade.streak, index]);
+
+  if (!question || !key) return null;
+
   const hud = gradeRun(quiz.seed, quiz.difficulty, answers);
+  const watch = WATCHES[index] ?? `Watch ${index + 1}`;
 
   function submit(value: string | number) {
     if (feedback) return;
@@ -368,19 +436,38 @@ function Play({ quiz, onFinish }: { quiz: Quiz; onFinish: (answers: StudentAnswe
 
   return (
     <section className="play" onKeyDown={onKey}>
-      <div className="hud" aria-live="polite">
-        <span>Q {index + 1} / {quiz.questions.length}</span>
-        <span>{hud.totalPoints} pts</span>
-        <span>Streak {hud.bestStreak}</span>
+      {pop && <div className={`combo-pop combo-${graded?.kind}`} role="status">{pop}</div>}
+      <div className="hud">
+        <ol className="stations" aria-label="Watch progress">
+          {quiz.questions.map((item, i) => (
+            <li key={item.id} className={i < index ? "done" : i === index ? "now" : ""}>
+              <span className="sr-only">
+                {i === index ? "Current" : i < index ? "Done" : "Upcoming"} question {i + 1}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <div className="hud-stats">
+          <span>{hud.totalPoints} pts</span>
+          <span className={hud.bestStreak >= 3 ? "hot" : ""}>
+            {hud.bestStreak >= 3 ? "🔥" : "·"} streak {answers.filter(Boolean).length ? hud.bestStreak : 0}
+          </span>
+        </div>
       </div>
-      <article className="question">
-        <p className="eyebrow">{question.title}</p>
+      <article className="question glow">
+        <p className="eyebrow">
+          {watch} · {TYPE_LABELS[question.type]} · {index + 1}/{quiz.questions.length}
+        </p>
         <h1>{question.prompt}</h1>
         <p>{question.context}</p>
-        {quiz.difficulty === "practice" && question.formulaHint && (
-          <p className="formula" aria-label="Formula hint">
-            {question.formulaHint}
-          </p>
+        {question.formulaHint && !feedback && (
+          showHint ? (
+            <p className="formula">{question.formulaHint}</p>
+          ) : (
+            <button type="button" className="hint-link" onClick={() => setShowHint(true)}>
+              Need a tiny formula?
+            </button>
+          )
         )}
         {question.type === "sim" && (
           <Simulator
@@ -390,26 +477,44 @@ function Play({ quiz, onFinish }: { quiz: Quiz; onFinish: (answers: StudentAnswe
           />
         )}
         {question.type === "calc" && !feedback && (
-          <form
-            className="calc-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              submit(draft);
-            }}
-          >
-            <label className="field">
-              <span>Your answer</span>
-              <input
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                inputMode="decimal"
-                placeholder={question.placeholder}
-                autoComplete="off"
-                required
-              />
-            </label>
-            <button type="submit" className="btn btn-primary">Check</button>
-          </form>
+          <div className="chip-board">
+            {question.chips?.map((chip) => (
+              <button
+                key={chip.value}
+                type="button"
+                className="chip"
+                onClick={() => submit(chip.value)}
+              >
+                {chip.label}
+              </button>
+            ))}
+            {!showType ? (
+              <button type="button" className="hint-link" onClick={() => setShowType(true)}>
+                I’d rather type a number
+              </button>
+            ) : (
+              <form
+                className="calc-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  submit(draft);
+                }}
+              >
+                <label className="field">
+                  <span>Your number</span>
+                  <input
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    inputMode="decimal"
+                    placeholder={question.placeholder}
+                    autoComplete="off"
+                    required
+                  />
+                </label>
+                <button type="submit" className="btn btn-primary">Check</button>
+              </form>
+            )}
+          </div>
         )}
         {(question.type === "mcq" || question.type === "sim") && question.choices && !feedback && (
           <div className="choices" role="list">
@@ -443,7 +548,7 @@ function Play({ quiz, onFinish }: { quiz: Quiz; onFinish: (answers: StudentAnswe
               disabled={!draft}
               onClick={() => submit(draft)}
             >
-              Lock in this graph
+              That’s the picture
             </button>
           </div>
         )}
@@ -453,17 +558,17 @@ function Play({ quiz, onFinish }: { quiz: Quiz; onFinish: (answers: StudentAnswe
               <p>
                 <strong>
                   {graded.kind === "correct"
-                    ? "That’s the idea."
+                    ? "Nimbus learned something."
                     : graded.kind === "partial"
-                      ? "Close — partial credit."
-                      : "Not quite — and that misconception is common."}
+                      ? "Almost — half a biscuit."
+                      : "Common mix-up. That’s the lesson."}
                 </strong>{" "}
                 +{graded.grade.points} pts
               </p>
               <p>{graded.explanation}</p>
               {graded.kind !== "correct" && <p className="miscon">{graded.misconception}</p>}
               <button type="button" className="btn btn-primary" onClick={nextQuestion}>
-                {index + 1 >= quiz.questions.length ? "See your summary" : "Next question"}
+                {index + 1 >= quiz.questions.length ? "Collect your stamps" : "Next watch"}
               </button>
             </div>
           )}
@@ -475,18 +580,29 @@ function Play({ quiz, onFinish }: { quiz: Quiz; onFinish: (answers: StudentAnswe
 
 function Lab({ onPlay }: { onPlay: () => void }) {
   return (
-    <section className="panel">
-      <h1>Simulation lab</h1>
+    <section className="panel glow">
+      <h1>Weather dice</h1>
       <p>
-        Drag the return period, pick 10, 50, or 100 years, and run it again. The probability stays put.
-        The history does not. That is what “once in N years” actually looks like.
+        Slide how rare the storm is. Pick a stretch of years. Hit reroll. The chance never changes —
+        only the story does. That’s the whole game.
       </p>
       <Simulator />
       <button type="button" className="btn btn-primary" onClick={onPlay}>
-        Play a scored round
+        Clock in for a scored watch
       </button>
     </section>
   );
+}
+
+function stampsFor(report: ReturnType<typeof gradeRun>) {
+  const stamps: { name: string; got: boolean }[] = [
+    { name: "Nickname flipper", got: report.concepts.some((c) => c.concept === "t-from-p" && c.correct > 0) },
+    { name: "Calendar breaker", got: report.concepts.some((c) => c.concept === "not-a-schedule" && c.correct > 0) },
+    { name: "Cluster watcher", got: report.concepts.some((c) => c.concept === "clustering" && c.correct > 0) },
+    { name: "63% club", got: report.concepts.some((c) => c.concept === "at-least-once" && c.correct > 0) || report.correct === report.items.length },
+    { name: "Hot streak", got: report.bestStreak >= 5 },
+  ];
+  return stamps;
 }
 
 function Summary({
@@ -508,50 +624,47 @@ function Summary({
   onReplay: () => void;
   onLab: () => void;
 }) {
+  const stamps = stampsFor(report);
   return (
-    <section className="panel">
-      <h1>Your learning summary</h1>
+    <section className="panel glow">
+      <h1>Watch complete</h1>
       <p className="scoreline">
-        <strong>{report.totalPoints}</strong> points · {report.correct}/{report.items.length} correct
+        <strong>{report.totalPoints}</strong> pts · {report.correct}/{report.items.length} caught
         · best streak {report.bestStreak}
       </p>
       <p>{report.summary}</p>
+      <ul className="stamps">
+        {stamps.map((stamp) => (
+          <li key={stamp.name} className={stamp.got ? "got" : ""}>
+            <b>{stamp.got ? "★" : "☆"}</b> {stamp.name}
+          </li>
+        ))}
+      </ul>
       <ul className="concepts">
         {report.concepts.map((concept) => (
           <li key={concept.concept}>
             <span>{concept.label}</span>
-            <meter
-              min={0}
-              max={concept.attempted}
-              value={concept.correct}
-              aria-label={`${concept.correct} of ${concept.attempted} on ${concept.label}`}
-            />
+            <meter min={0} max={concept.attempted} value={concept.correct} />
             <b>{concept.correct}/{concept.attempted}</b>
           </li>
         ))}
       </ul>
-      {report.strengths.length > 0 && (
-        <p><strong>Strengths:</strong> {report.strengths.join("; ")}.</p>
-      )}
-      {report.improve.length > 0 && (
-        <p><strong>Revisit:</strong> {report.improve.join("; ")}.</p>
-      )}
       <blockquote>
-        Remember: T = 1/p is an average rate. Limited data, methods, geography, and climate change can all revise N.
+        Take this home: T = 1/p is an average rate. It is not a calendar, and climate can still move N.
       </blockquote>
       <div className="hero-actions">
         <button type="button" className="btn btn-primary" onClick={onSubmit}>
-          Post {player.anonymous ? "an anonymous" : "my"} score
+          Pin {player.anonymous ? "an anonymous" : "my"} score
         </button>
         <button type="button" className="btn btn-secondary" onClick={onReplay}>
-          New questions
+          Another watch
         </button>
         <button type="button" className="btn btn-ghost" onClick={onLab}>
-          Try the lab
+          Shake the dice
         </button>
       </div>
       {submitState && <p className="muted" role="status">{submitState}</p>}
-      <p className="fine">Seed {seed} · {answers.length} answers stored only as a score, not as personal data.</p>
+      <p className="fine">Seed {seed} · {answers.length} calls · no personal data.</p>
     </section>
   );
 }
@@ -569,47 +682,46 @@ function Board({ classCode, difficulty }: { classCode: string; difficulty: Diffi
       const data = await fetchLeaderboard(filterCode, filterDiff);
       setEntries(data.entries);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Leaderboard unavailable.");
+      setError(err instanceof Error ? err.message : "Board unavailable.");
       setEntries([]);
     }
   }
 
   useEffect(() => {
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <section className="panel">
-      <h1>Leaderboard</h1>
-      <p>Scores are nicknames or anonymous IDs only. Filter by class code for a tutorial-group board.</p>
+    <section className="panel glow">
+      <h1>Harbour honour board</h1>
+      <p>Nicknames and anonymous storm IDs only. Filter by class code for a tutorial heat.</p>
       <form className="inline-form" onSubmit={load}>
         <label className="field">
           <span>Class code</span>
-          <input value={filterCode} onChange={(event) => setFilterCode(event.target.value)} placeholder="All classes" />
+          <input value={filterCode} onChange={(event) => setFilterCode(event.target.value)} placeholder="All watches" />
         </label>
         <label className="field">
-          <span>Mode</span>
+          <span>Watch</span>
           <select value={filterDiff} onChange={(event) => setFilterDiff(event.target.value)}>
             <option value="">All</option>
-            <option value="practice">Practice</option>
-            <option value="challenge">Challenge</option>
+            <option value="practice">Morning</option>
+            <option value="challenge">Typhoon</option>
           </select>
         </label>
         <button type="submit" className="btn btn-secondary">Refresh</button>
       </form>
       {error && <p className="error" role="alert">{error}</p>}
-      {entries.length === 0 && !error && <p className="muted">No scores yet. Be the first storm.</p>}
+      {entries.length === 0 && !error && <p className="muted">Empty pier. Be the first observer.</p>}
       {entries.length > 0 && (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Rank</th>
-                <th scope="col">Player</th>
-                <th scope="col">Mode</th>
+                <th scope="col">#</th>
+                <th scope="col">Observer</th>
+                <th scope="col">Watch</th>
                 <th scope="col">Score</th>
-                <th scope="col">Correct</th>
+                <th scope="col">Caught</th>
                 <th scope="col">Streak</th>
               </tr>
             </thead>
@@ -618,7 +730,7 @@ function Board({ classCode, difficulty }: { classCode: string; difficulty: Diffi
                 <tr key={`${entry.rank}-${entry.nickname}-${entry.createdAt}`}>
                   <td>{entry.rank}</td>
                   <td>{entry.nickname}{entry.anonymous ? " · anon" : ""}</td>
-                  <td>{entry.difficulty}</td>
+                  <td>{entry.difficulty === "challenge" ? "Typhoon" : "Morning"}</td>
                   <td>{entry.score}</td>
                   <td>{entry.correct}/{entry.questionCount}</td>
                   <td>{entry.bestStreak}</td>
@@ -630,8 +742,4 @@ function Board({ classCode, difficulty }: { classCode: string; difficulty: Diffi
       )}
     </section>
   );
-}
-
-function Rain() {
-  return <div className="rain" aria-hidden="true" />;
 }

@@ -16,14 +16,14 @@
     {
       "binding": "DB",
       "database_name": "once-in-n-years",
-      "database_id": "00000000-0000-0000-0000-000000000001",
+      "database_id": "27b71f48-bd9b-46cf-9b15-1f7c2360dd03",
       "migrations_dir": "migrations"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "RATE_LIMIT",
-      "id": "00000000000000000000000000000001"
+      "id": "a16808c2623442e08ebd225a9abc89d3"
     }
   ],
   "vars": {
