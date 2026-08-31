@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "types": "wrangler types",
     "deploy": "npm run build && wrangler deploy",
-    "db:migrate:local": "wrangler d1 migrations apply once-in-n-years --local",
+    "db:migrate:local": "CI=1 wrangler d1 migrations apply once-in-n-years --local",
     "db:migrate:remote": "wrangler d1 migrations apply once-in-n-years --remote"
   },
   "dependencies": {

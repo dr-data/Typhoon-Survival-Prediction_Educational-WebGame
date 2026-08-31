@@ -14,9 +14,11 @@ Requires Node 22+.
 cd once-in-n-years
 npm install
 npm test
-npx wrangler d1 migrations apply once-in-n-years --local
+npm run db:migrate:local
 npm run dev
 ```
+
+`npm run dev` does **not** require a Cloudflare account. Workers AI is off by default so Vite will not open a login window. To enable paraphrased hints later, add `"ai": { "binding": "AI" }` to `wrangler.jsonc` after `npx wrangler login`.
 
 Open the URL Vite prints (usually `http://localhost:5173`).
 
