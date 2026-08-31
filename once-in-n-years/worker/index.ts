@@ -18,10 +18,12 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use("/api/*", cors({ origin: "*", allowMethods: ["GET", "POST", "OPTIONS"] }));
 
 app.use("/api/*", async (c, next) => {
-  const ip = c.req.header("CF-Connecting-IP") ?? "local";
-  const limited = await rateLimit(c.env.RATE_LIMIT, ip, 90, 60);
-  if (!limited.ok) {
-    return c.json({ error: "Too many requests. Take a breath and try again in a minute." }, 429);
+  if (c.env.RATE_LIMIT) {
+    const ip = c.req.header("CF-Connecting-IP") ?? "local";
+    const limited = await rateLimit(c.env.RATE_LIMIT, ip, 90, 60);
+    if (!limited.ok) {
+      return c.json({ error: "Too many requests. Take a breath and try again in a minute." }, 429);
+    }
   }
   await next();
 });
@@ -96,6 +98,10 @@ app.post("/api/runs", async (c) => {
     return c.json({ error: "That run was too fast to submit. Play it through, then post." }, 400);
   }
 
+  if (!c.env.DB) {
+    return c.json({ error: "Leaderboard is not bound in this preview." }, 503);
+  }
+
   const id = crypto.randomUUID();
   const createdAt = Date.now();
   await c.env.DB.prepare(
@@ -144,6 +150,9 @@ app.post("/api/runs", async (c) => {
 });
 
 app.get("/api/leaderboard", async (c) => {
+  if (!c.env.DB) {
+    return c.json({ classCode: null, entries: [], preview: true });
+  }
   const difficulty = c.req.query("difficulty");
   const classCodeRaw = c.req.query("classCode");
   let classCode: string | null = null;

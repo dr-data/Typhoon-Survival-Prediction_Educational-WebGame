@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createRng, interpretSimulation, simulateEvents } from "../../shared/math";
+import { createRng, interpretSimulation, roundTo, simulateEvents } from "../../shared/math";
 
 export function Simulator({
   initialReturnPeriod = 50,
@@ -53,7 +53,7 @@ export function Simulator({
       <SimTimeline result={result} />
       <p className="sim-readout" aria-live="polite">
         <strong>{result.count}</strong> event{result.count === 1 ? "" : "s"} in {years} years.
-        Long-term average would be <strong>{result.expectedCount}</strong>.
+        Long-term average would be <strong>{roundTo(result.expectedCount, 1)}</strong>.
         {result.eventYears.length > 0
           ? ` Timing: year ${result.eventYears.join(", year ")}.`
           : " Nothing crossed the line in this run."}
